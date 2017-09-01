@@ -1,0 +1,35 @@
+* split_aseq
+
+Sometimes you have to look at MARC-aseq files in a text editor. As aseq files can
+contain lots of records, so it can become tedious scan them with the naked eye.
+split_aseq splits aseq files into one file per record and does some pretty
+printing anlong the way.
+
+** How to use it
+*** Running the script directly
+    split_aseq requires Python 3.6 and has been tested under Windows 10 so far.
+    So if you have Python 3.6 installed and are not afraid of the command line,
+    do the following:
+    
+    - Clone or copy the repo and put your source file into the directory
+     "infiles".
+    - Run the script with =python split_aseq.py=
+    - That's it
+*** pre-built executable
+    - Is to come.
+** What you get
+   If the programm runs successfully, there will be a folder named =outfiles=
+   where you find the following:
+   
+   - one single file for each record in your source file, with the identifier
+     from Field 001 as filename
+   - a file called =titles.txt= where you find a list of identifiers (i. e. the
+     filenames) and the corresponding title information from MARC field 245.
+
+** Issues
+   This is a quick an dirty script, so don't use it for critical stuff. I am not
+   a programmer, I don't take any responsibility. Still, there are some things i
+   want do implement in the future:
+   
+   - at this time, it processes only the first file in the =infiles= directory.
+     It should process all files in that directory.
