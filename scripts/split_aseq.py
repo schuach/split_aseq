@@ -1,35 +1,39 @@
 # Program to split an aseq file into single files per dataset
 # This programm is in a quick and dirty state so no warranty at all
-# Version: 0.1
+# Version: 0.2
 # Author: Stefan Schuh
 # Email: stefan.schuh@uni-graz.at
 
-
 from sys import argv
-import re
 import os
 
-# if len(argv) == 2:
-#     script, infile = argv
-# else:
-#     infile = input("Bitte Dateinamen eingeben!\n>>> ")
 
-infile = "../infiles/" + os.listdir("../infiles/")[0]
+class ToC (object):
 
-fh = open("../infiles/" + infile, encoding="utf-8", errors="replace")
-cur_ds = None
+    def __init__(self):
+        self.entries = []
 
-ds = []
-count = 0
-fname = ""
-titles = []
+    def add_entry(self, fname, line):
+        self.entries.append(fname + "     " + line[21:].replace("$$b", " : ")
+                                            .replace("$$c", " / ")
+                                            .replace("$$n", ". ")
+                                            .replace("$$p", ", "))
 
-# make the necessary dirs, empty them out if they exist
+    def write_to_file(self, fname):
+        with open(fname, "w", encoding="utf-8", errors="replace") as tocfile:
+            for entry in self.entries:
+                tocfile.write(entry)
+
+
+# setting the stage
 if "outfiles" in os.listdir("../"):
     for file in os.listdir("../outfiles"):
         os.remove("../outfiles/" + file)
 else:
     os.mkdir("../outfiles")
+
+infiles = ["../infiles/" + file for file in os.listdir("../infiles/")]
+
 
 def write_ds(ds, fname):
     with open(f"../outfiles/{fname}.seq", "w", encoding="utf-8", errors="replace") as fh_o:
@@ -59,32 +63,38 @@ def set_title(line):
     else:
         pass
 
+def process_infile(file, toc):
+    fh = open(file, "r", encoding="utf-8", errors="replace")
 
-for line in fh:
-    if line[10:13] == "001":
-        # sets the filename
-        fname = line[18:].strip()
+    toc = toc
+    cur_ds = None
+    ds = []
+    fname = ""
+    # konverterstand = file.rsplit("/")[-1][11:27]
+    for line in fh:
+        if line[10:13] == "001":
+            # sets the filename
+            fname = line[18:].strip() # + "_" + konverterstand
 
-    if line[10:13] == "245":
-        titles.append(fname + "     " + line[21:].replace("$$b", " : ")
-                                                 .replace("$$c", " / ")
-                                                 .replace("$$n", ". ")
-                                                 .replace("$$p", ", ") )
+        if line[10:13] == "245":
+            toc.add_entry(fname, line)
 
-    if line[:9] == cur_ds or cur_ds == None:
-        cur_ds = line[:9]
-        ds.append(prettyprint(line))
+        if line[:9] == cur_ds or cur_ds == None:
+            cur_ds = line[:9]
+            ds.append(prettyprint(line))
 
-    else:
-        write_ds(ds, fname)
-        ds = [line[10:16] + line[18:]]
-        count += 1
-        cur_ds = line[:9]
+        else:
+            write_ds(ds, fname)
+            ds = [line[10:16] + line[18:]]
+            cur_ds = line[:9]
 
-write_ds(ds, fname)
+    write_ds(ds, fname)
 
-with open("../outfiles/titles.txt", "w", encoding="utf-8", errors="replace") as titfile:
-    for title in titles:
-        titfile.write(title)
+    fh.close()
 
-fh.close()
+
+toc = ToC()
+for file in infiles:
+    process_infile(file, toc)
+
+toc.write_to_file("../outfiles/ToC.txt")
