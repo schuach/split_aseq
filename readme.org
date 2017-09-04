@@ -1,8 +1,8 @@
 * split_aseq
 
 Sometimes you have to look at MARC-aseq files in a text editor. As aseq files can
-contain lots of records, so it can become tedious scan them with the naked eye.
-split_aseq splits aseq files into one file per record and does some pretty
+contain lots of records, it can become tedious to scan them with the naked eye.
+=split_aseq= splits aseq files into one file per record and does some pretty
 printing anlong the way.
 
 ** How to use it
@@ -21,15 +21,31 @@ printing anlong the way.
    If the programm runs successfully, there will be a folder named =outfiles=
    where you find the following:
    
-   - one single file for each record in your source file, with the identifier
-     from Field 001 as filename
+   - There will be one single file for each record in your source file.
+     - If the input files are named like this:
+       =m2m_ubg_st_2017-08-01_17-00.marc.seq= the name of the output files inherit the
+       date and time of the input file. The file names will look like this: 
+       =AC12345678_2017-08-01_17-00.seq=
+     - If not, it is only the ID from 001, like this: =AC12345678.seq=
+     - If your input files have mixed naming konventions, the output files will
+       do so too.
    - a file called =titles.txt= where you find a list of identifiers (i. e. the
      filenames) and the corresponding title information from MARC field 245.
+   - All contents of the folder are erased everytime the script is executed. So
+     don't forget to take your files with you if you plan to keep them.
 
-** Issues
+** Known limitations
    This is a quick an dirty script, so don't use it for critical stuff. I am not
-   a programmer, I don't take any responsibility. Still, there are some things i
-   want do implement in the future:
+   a programmer, I don't take any responsibility. Still there are things that I
+   might or might not implement in the future, should I or somebody else need it:
    
-   - at this time, it processes only the first file in the =infiles= directory.
-     It should process all files in that directory.
+   - At this time, the script only processes aseq-files that have the following
+     format:
+     #+BEGIN_EXAMPLE aseq
+     013638981 24500 L $$aProdukt- und Markenpiraterie - Risiken und Abwehrstrategien
+     #+END_EXAMPLE
+     All my input files look like that, so theres no handling for files without
+     the leading Number.
+   - Output files for the same record are overwritten, if the input files don't
+     follow the naming convention mentioned above.
+     

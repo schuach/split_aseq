@@ -1,10 +1,8 @@
-# Program to split an aseq file into single files per dataset
-# This programm is in a quick and dirty state so no warranty at all
-# Version: 0.2
-# Author: Stefan Schuh
-# Email: stefan.schuh@uni-graz.at
+# Program to split an aseq file into single files per dataset This script is in
+# a quick and dirty state so no warranty is given at all
+# Version: 0.2 Author:
+# Stefan Schuh Email: stefan.schuh@uni-graz.at
 
-from sys import argv
 import os
 
 
@@ -20,6 +18,7 @@ class ToC (object):
                                             .replace("$$p", ", "))
 
     def write_to_file(self, fname):
+        print(f'### Schreibe Inhaltsverzeichnis in "{fname.rsplit("/")[-1]}".')
         with open(fname, "w", encoding="utf-8", errors="replace") as tocfile:
             for entry in self.entries:
                 tocfile.write(entry)
@@ -33,9 +32,13 @@ else:
     os.mkdir("../outfiles")
 
 infiles = ["../infiles/" + file for file in os.listdir("../infiles/")]
-
+if len(infiles) < 1:
+    print("Das Input-Verzeichnis ist leer! Bitte speichern Sie mindestens eine Datei in ./infiles/")
+    input("Drücken Sie die ENTER-Taste um dieses Fenster zu schließen.")
+    quit()
 
 def write_ds(ds, fname):
+    print(f'  ...\tSchreibe {fname}.seq')
     with open(f"../outfiles/{fname}.seq", "w", encoding="utf-8", errors="replace") as fh_o:
         for line in ds:
             fh_o.write(line)
@@ -70,11 +73,18 @@ def process_infile(file, toc):
     cur_ds = None
     ds = []
     fname = ""
-    # konverterstand = file.rsplit("/")[-1][11:27]
+    infile_name = file.rsplit("/")[-1]
+    print(f"### Verarbeite {infile_name}")
+    if infile_name.startswith("m2m_") and len(infile_name) > 28:
+        konverterstand = file.rsplit("/")[-1][11:27]
+
     for line in fh:
         if line[10:13] == "001":
             # sets the filename
-            fname = line[18:].strip() # + "_" + konverterstand
+            if "konverterstand" in locals():
+                fname = line[18:].strip() + "_" + konverterstand
+            else:
+                fname = line[18:].strip()
 
         if line[10:13] == "245":
             toc.add_entry(fname, line)
@@ -89,12 +99,15 @@ def process_infile(file, toc):
             cur_ds = line[:9]
 
     write_ds(ds, fname)
-
     fh.close()
-
+    print("\n")
 
 toc = ToC()
 for file in infiles:
     process_infile(file, toc)
 
 toc.write_to_file("../outfiles/ToC.txt")
+print('''\n### Vorgang abgeschlossen. Sie finden die einzelnen Dateien und
+    das Inhaltsverzeichnis im Ordner "./outfiles/"''')
+
+input("\nDrücken Sie die ENTER-Taste, um dieses Fenster zu schließen.")
