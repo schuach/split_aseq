@@ -12,7 +12,7 @@ class ToC (object):
         self.entries = []
 
     def add_entry(self, fname, line):
-        self.entries.append(fname + "     " + line[21:].replace("$$b", " : ")
+        self.entries.append(fname[:10] + "   " + line[:9] + "   " + line[21:].replace("$$b", " : ")
                                             .replace("$$c", " / ")
                                             .replace("$$n", ". ")
                                             .replace("$$p", ", "))
@@ -20,6 +20,8 @@ class ToC (object):
     def write_to_file(self, fname):
         print(f'### Schreibe Inhaltsverzeichnis in "{fname.rsplit("/")[-1]}".')
         with open(fname, "w", encoding="utf-8", errors="replace") as tocfile:
+            tocfile.write("""AC-Nummer  | Sys.-Nnr  |  Titel
+-----------+-----------+------------------------------------------------------------------------\n""")
             for entry in self.entries:
                 tocfile.write(entry)
 
@@ -56,7 +58,9 @@ def prettyprint(line):
     else:
         outl = line
 
-    outl = outl[:3] + outl[3:5].replace(" ", "#") + outl[5:]
+    if not (outl.startswith("LDR") or outl.startswith("00")):
+        # replace indicator <space> with # for readability
+        outl = outl[:3] + outl[3:5].replace(" ", "#") + outl[5:]
     return outl
 
 def set_title(line):
